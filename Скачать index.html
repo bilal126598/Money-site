@@ -1,0 +1,118 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Money-сайт</title>
+  <style>
+    body {
+      background-color: #1f1f1f;
+      color: #ffffff;
+      font-family: monospace;
+      padding: 20px;
+    }
+    h1 {
+      color: #00ffaa;
+    }
+    textarea {
+      width: 100%;
+      height: 200px;
+      background: #2b2b2b;
+      color: #ffffff;
+      border: 1px solid #555;
+      padding: 10px;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #00ffaa;
+      color: black;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .output {
+      margin-top: 20px;
+      background: #2b2b2b;
+      padding: 10px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>💸 Money-сайт</h1>
+  <p>Вставь сюда список переводов:</p>
+  <textarea id="input"></textarea>
+  <button onclick="process()">Посчитать</button>
+  <div class="output" id="output"></div>
+
+  <script>
+    const bankMap = {
+      'ЗАИРА': '🏦🔸',
+      'МАКСИМ': '🏦🔸',
+      'ЮСУФ': '🏦🔸',
+      'СИДРАТ': '🏦🔸',
+      'ЛАРИСА': '🏦🔸',
+      'РАДЖАБ': '🏦🔸',
+      'САБИР': '🏦🔸',
+      'ИБРА Т': '🏦🔸',
+      'КУРБАН': '🏦🔸',
+      'ФАИНА': '🏦🔹',
+      'ИБРА': '🏦🔹',
+      'ГАДЖИ': '🏦🟣',
+      'ГАДЖИМУРАД': '🏦🟣',
+      'ИСЛАМ': '🏦🟣',
+      'АБДУЛ': '🏦🟣',
+      'ШЕЙХ': '🏦🟣',
+      'ШЕЙХМУСТАФА': '🏦🟣',
+      'ДАВИД': '🏦🟣',
+      'МУГ': '🏦🟣',
+      'МУГМА': '🏦🟣',
+      'САЛИМАТ': '🏦🟣'
+    };
+
+    function process() {
+      const text = document.getElementById("input").value;
+      const lines = text.split("\n");
+      const people = {};
+
+      for (let line of lines) {
+        line = line.replace(/\(.*?\)/g, "");
+        const parts = line.trim().split(" ");
+        const name = parts.shift().toUpperCase();
+        if (!name) continue;
+        const sums = parts.filter(x => /^[\d.]+т?$/.test(x));
+        if (!sums.length) continue;
+
+        const normalName = `**<b>${name}</b>**`;
+        const bank = bankMap[name] || '';
+
+        if (!people[normalName]) people[normalName] = { bank, amounts: [] };
+        for (let s of sums) {
+          let num = parseFloat(s.replace('т', '')) * (s.includes('т') ? 1000 : 1000);
+          people[normalName].amounts.push(num);
+        }
+      }
+
+      let out = "";
+      let total = 0;
+      for (let name in people) {
+        const group = {};
+        people[name].amounts.forEach(a => {
+          group[a] = (group[a] || 0) + 1;
+        });
+        let line = `${name} ${people[name].bank}\n`;
+        for (let sum in group) {
+          line += `— ${sum}₽ × ${group[sum]}\n`;
+          total += parseFloat(sum) * group[sum];
+        }
+        out += line + "\n";
+      }
+      out += `\n<b>💰 ОБЩАК: ${total.toLocaleString("ru-RU")}₽</b>`;
+      document.getElementById("output").innerHTML = out;
+    }
+  </script>
+</body>
+</html>
